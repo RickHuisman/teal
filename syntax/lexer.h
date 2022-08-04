@@ -1,0 +1,77 @@
+#pragma once
+
+#include <string>
+#include <utility>
+#include <optional>
+
+enum class TokenType {
+  LeftParen,
+  RightParen,
+  LeftBrace,
+  RightBrace,
+
+  Comma,
+  Dot,
+  Minus,
+  Plus,
+  Semicolon,
+  Slash,
+  Star,
+
+  Bang,
+  BangEqual,
+  Equal,
+  EqualEqual,
+  Greater,
+  GreaterEqual,
+  Less,
+  LessEqual,
+
+  Identifier,
+  String,
+  Number,
+
+  Let,
+  Print,
+  True,
+  False,
+  If,
+  Else,
+  Fun,
+  Return,
+
+  Error,
+  Eof,
+};
+
+struct Token {
+  TokenType type;
+  std::string source;
+
+  Token(TokenType type, std::string source)
+      : type(type), source(std::move(source)) {}
+};
+
+class Lexer {
+  int current;
+  std::string source;
+
+  std::optional <Token> ScanToken();
+  static TokenType IdentifierType(const std::string &identifier);
+  Token Identifier();
+  Token Number();
+  Token String();
+  Token MakeToken(TokenType type);
+  void SkipWhitespace();
+  char Match(char expected);
+  char Advance();
+  char PeekNext();
+  char Peek();
+  bool Check(char c);
+  bool IsAtEnd();
+
+public:
+  explicit Lexer(std::string source) : source(std::move(source)), current(0) {}
+
+  std::vector <Token> Lex();
+};
