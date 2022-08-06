@@ -70,7 +70,7 @@ Expr *Parser::ParseFun() {
   Consume(TokenType::LeftParen, "TODO");
   std::vector<std::string> params;
   while (!Check(TokenType::RightParen) &&
-         !Check(TokenType::Eof)) {
+      !Check(TokenType::Eof)) {
     auto param = Consume(TokenType::Identifier, "TODO");
     params.push_back(param.source);
 
@@ -169,7 +169,7 @@ Expr *Parser::String(Token token) {
 Expr *Parser::Call(Expr *left, Token token) {
   std::vector<Expr *> args;
   while (!Check(TokenType::RightParen) &&
-         !Check(TokenType::Eof)) {
+      !Check(TokenType::Eof)) {
     args.push_back(Expression());
 
     if (!Match(TokenType::Comma)) break;

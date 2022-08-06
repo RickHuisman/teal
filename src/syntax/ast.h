@@ -6,7 +6,7 @@
 #include <optional>
 
 #include "../compiler/compiler.h"
-#include "../compiler/value.h"
+#include "../compiler/bytecode.h"
 
 using Identifier = std::string;
 

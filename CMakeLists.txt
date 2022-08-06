@@ -3,17 +3,6 @@ project(teal)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(syntax)
+include_directories(src)
 
-add_executable(teal
-        main.cpp
-        syntax/lexer.h
-        syntax/lexer.cpp
-        syntax/ast.h
-        syntax/ast.cpp
-        syntax/parser.h
-        syntax/parser.cpp
-        compiler/compiler.h
-        compiler/compiler.cpp
-        compiler/value.cpp
-        compiler/value.h)
+add_subdirectory(src)
