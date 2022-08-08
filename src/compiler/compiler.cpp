@@ -69,8 +69,8 @@ void Compiler::patch_jump(int offset) { // TODO: Int?
   current.function->bytecode->Code()[offset + 1] = (jump & 0xff);
 }
 
-void Compiler::emit_constant(Value value) {
-  auto index = current.function->bytecode->AddConstant(value);
+void Compiler::emit_constant(std::unique_ptr<Value> value) {
+  auto index = current.function->bytecode->AddConstant(std::move(value));
   emit(Opcode::Constant);
   emit_byte(index);
 }

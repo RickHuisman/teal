@@ -5,24 +5,23 @@
 #include <string>
 #include "../vm/opcode.h"
 
-//struct Value;
+struct Value;
 
 class Bytecode {
   std::vector<std::uint8_t> code_;
-  std::vector<Value> constants_;
+  std::vector<std::unique_ptr<Value>> constants_;
 
  public:
   void Write(Opcode opcode);
   void WriteByte(std::uint8_t byte);
-  std::uint8_t AddConstant(Value value);
+  std::uint8_t AddConstant(std::unique_ptr<Value> value);
   std::vector<std::uint8_t> Code();
-  std::vector<Value> Constants();
-  Value ReadConstant(uint8_t index);
+  Value *ReadConstant(uint8_t index);
   void DisassembleBytecode();
   int DisassembleInstruction(int offset);
-  int ConstantInstruction(std::string name, int offset);
-  int SimpleInstruction(std::string name, int offset);
-  int JumpInstruction(std::string name, int sign, int offset);
+  int ConstantInstruction(const std::string &name, int offset);
+  static int SimpleInstruction(const std::string &name, int offset);
+  int JumpInstruction(const std::string &name, int sign, int offset);
 };
 
 // TODO: Move?
@@ -30,17 +29,6 @@ enum class FunctionType {
   Closure,
   Function,
   Script,
-};
-
-enum class ObjType {
-  Closure,
-  Function,
-  String,
-};
-
-struct Obj {
-  ObjType type;
-  struct Obj *next;
 };
 
 struct FunctionObj {
@@ -61,55 +49,32 @@ enum ValueType {
   Closure,
 };
 
-class Value {
- public:
-  virtual ~Value() = default;
-
-  [[nodiscard]] ValueType Type() const { return type_; }
-
- protected:
-  explicit Value(ValueType type) : type_(type) {}
-
- private:
-  ValueType type_;
-};
-
-struct NumberValue : public Value {
-  float number;
-
-  explicit NumberValue(float number)
-      : Value(ValueType::Number), number(number) {}
-};
-
-struct BoolValue : public Value {
-  bool bool_;
-
-  explicit BoolValue(bool bool_) : Value(ValueType::Bool), bool_(bool_) {}
-};
-
-struct ClosureValue : public Value {
+struct ClosureValue {
   FunctionObj *function;
 
-  explicit ClosureValue(FunctionObj *function)
-      : Value(ValueType::Closure), function(function) {}
+  explicit ClosureValue(FunctionObj *function) : function(function) {}
 };
 
-//struct Value {
-//  ValueType type;
-//  double numberValue;
-//  bool boolValue;
-//  std::unique_ptr<ClosureObj> closureValue;
-//
-//  Value(double val) : numberValue(val), type(ValueType::Double) {
-//  }
-//
-//  Value(bool val) : boolValue(val), type(ValueType::Bool) {
-//  }
-//
-//  Value(std::unique_ptr<ClosureObj> clos) : closureValue(std::move(clos)), type(ValueType::Closure) {
-//  }
-//};
-//
+struct Value {
+  ValueType Type;
+
+  float number;
+  std::unique_ptr<ClosureValue> closure;
+
+  explicit Value(float n)
+      : Type(ValueType::Number), number(n), closure(nullptr) {}
+
+  explicit Value(ClosureValue closure)
+      : Type(ValueType::Closure),
+        closure(std::make_unique<ClosureValue>(closure)),
+        number(0) {}
+
+  explicit Value(FunctionObj *function)
+      : Type(ValueType::Closure),
+        closure(std::make_unique<ClosureValue>(function)),
+        number(0) {}
+};
+
 //Value operator+(const Value &a, const Value &b);
 //
 //Value operator-(const Value &a, const Value &b);
@@ -127,5 +92,5 @@ struct ClosureValue : public Value {
 //Value operator-(const Value &a);
 //
 //Value operator!(const Value &a);
-//
-//std::ostream &operator<<(std::ostream &os, const Value &value);
+
+std::ostream &operator<<(std::ostream &os, const Value &value);

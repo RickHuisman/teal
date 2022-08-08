@@ -9,8 +9,8 @@ void VM::interpret(const std::string& source) {
   output = &std::cout;
 
   auto fun = compile(source);
-  auto closureVal = new ClosureValue(fun.get());
-  stack.push_back(*closureVal);
+  auto closure = ClosureValue(fun.get());
+  push(std::make_unique<Value>(closure));
   CallValue(0);
   run();
 }
@@ -26,7 +26,7 @@ void VM::run() {
     auto instruction = static_cast<Opcode>(read_byte());
     switch (instruction) {
       case Opcode::Return:
-        std::cout << "return_\n"; // TODO:
+        return_();
         break;
       case Opcode::Constant:
         constant();
@@ -77,8 +77,20 @@ void VM::run() {
   }
 }
 
+void VM::return_() {
+  auto result = pop();
+  frames.pop_back();
+
+  auto stack_start = frames.back().stack_start;
+
+//  stack.erase(stack.begin() + stack_start, stack.end());
+//  stack.resize(stack.begin(), stack.begin() + stack_start); // TODO: Truncate?
+
+  push(std::move(result));
+}
+
 void VM::constant() {
-  push(read_constant());
+  push(std::move(read_constant()));
 }
 
 void VM::add() {
@@ -148,48 +160,60 @@ void VM::loop() {
 
 void VM::print() {
   auto popped = pop();
-  std::cout << "PRINT!" << std::endl;
-//  std::cout << popped/**/;
-//  *output << popped << std::endl;
+
+  if (popped->Type == ValueType::Number) {
+    std::cout << popped->number << std::endl;
+  } else {
+    std::cout << "TODO!" << std::endl;
+  }
 }
 
 void VM::CallValue(std::uint8_t arity) {
   auto frame_start = stack.size() - (arity + 1);
-  Value *callee = &stack[frame_start];
+  auto callee = &stack[frame_start];
 
-  if (callee->Type() == ValueType::Closure) {
-    auto *clos = static_cast<ClosureValue*>(callee);
-    Call(clos, arity);
+  if (callee->get()->Type == ValueType::Closure) {
+//    auto *clos = dynamic_cast<ClosureValue*>(callee->get()); TODO
+    Call(*callee->get()->closure, arity);
   } else {
     throw std::exception();
 //      _ => return Err(RuntimeError::InvalidCallee),
   }
 }
 
-void VM::Call(ClosureValue *closure, std::uint8_t arity) {
-  if (arity != closure->function->arity) {
+void VM::Call(ClosureValue closure, std::uint8_t arity) {
+  if (arity != closure.function->arity) {
     throw std::exception();
 //    return Err(RuntimeError::IncorrectArity);
   }
 
   auto frame_start = stack.size() - (arity + 1);
-//  auto newFrame = new CallFrame(closure, frame_start);
-//  frames.push_back(newFrame);
+  frames.emplace_back(std::make_unique<ClosureValue>(closure), frame_start);
 }
 
-void VM::push(Value value) {
-  stack.push_back(value);
+void VM::push(std::unique_ptr<Value> value) {
+  stack.push_back(std::move(value));
 }
 
-Value VM::pop() {
-  auto popped = stack.back();
+std::unique_ptr<Value> VM::pop() {
+  auto popped = std::move(stack.back());
   stack.pop_back();
   return popped; // TODO: Pop back?
 }
 
-Value VM::read_constant() {
+std::unique_ptr<Value> VM::read_constant() {
   auto index = read_byte();
-  return current_bytecode()->ReadConstant(index);
+  auto constant = current_bytecode()->ReadConstant(index);
+
+  if (constant->Type == ValueType::Number) {
+    return std::make_unique<Value>(constant->number);
+  }
+
+  throw std::exception();
+
+//  auto foobar = std::make_unique<Value>(*constant);
+//
+//  return foobar; // TODO:
 }
 
 std::uint8_t VM::read_byte() {

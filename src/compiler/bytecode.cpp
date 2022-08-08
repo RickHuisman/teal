@@ -10,21 +10,17 @@ void Bytecode::WriteByte(std::uint8_t byte) {
   code_.push_back(byte);
 }
 
-std::uint8_t Bytecode::AddConstant(Value value) {
-  constants_.push_back(value);
+std::uint8_t Bytecode::AddConstant(std::unique_ptr<Value> value) {
+  constants_.push_back(std::move(value));
   return constants_.size() - 1;
 }
 
-Value Bytecode::ReadConstant(std::uint8_t index) {
-  return constants_[index];
+Value *Bytecode::ReadConstant(std::uint8_t index) {
+  return constants_[index].get(); // TODO: Get?
 }
 
 std::vector<std::uint8_t> Bytecode::Code() {
   return code_;
-}
-
-std::vector<Value> Bytecode::Constants() {
-  return constants_;
 }
 
 void Bytecode::DisassembleBytecode() {
@@ -35,12 +31,12 @@ void Bytecode::DisassembleBytecode() {
   }
 }
 
-int Bytecode::SimpleInstruction(std::string name, int offset) {
+int Bytecode::SimpleInstruction(const std::string& name, int offset) {
   std::cout << name << std::endl;
   return offset + 1;
 }
 
-int Bytecode::ConstantInstruction(std::string name, int offset) {
+int Bytecode::ConstantInstruction(const std::string& name, int offset) {
   auto constant = code_[offset + 1];
   std::cout << std::setw(16)
             << std::left
@@ -48,11 +44,12 @@ int Bytecode::ConstantInstruction(std::string name, int offset) {
             << name
             << toascii(constant) // TODO: toascii?
             << ' ';
-//  std::cout << "'" << constants_[constant] << "'" << std::endl;
+
+  std::cout << "'" << *constants_[constant] << "'" << std::endl;
   return offset + 2;
 }
 
-int Bytecode::JumpInstruction(std::string name, int sign, int offset) {
+int Bytecode::JumpInstruction(const std::string& name, int sign, int offset) {
   uint16_t jump = (uint16_t) code_[offset + 1] << 8;
   jump |= code_[offset + 2];
 
@@ -86,38 +83,25 @@ int Bytecode::DisassembleInstruction(int offset) {
 
   auto instruction = code_[offset];
   switch (static_cast<Opcode>(instruction)) {
-    case Opcode::Return:
-      return SimpleInstruction("OP_RETURN", offset);
-    case Opcode::Constant:
-      return ConstantInstruction("OP_CONSTANT", offset);
-    case Opcode::Add:
-      return SimpleInstruction("OP_ADD", offset);
-    case Opcode::Subtract:
-      return SimpleInstruction("OP_SUBTRACT", offset);
-    case Opcode::Multiply:
-      return SimpleInstruction("OP_MULTIPLY", offset);
-    case Opcode::Divide:
-      return SimpleInstruction("OP_DIVIDE", offset);
-    case Opcode::Equal:
-      return SimpleInstruction("OP_EQUAL", offset);
-    case Opcode::Greater:
-      return SimpleInstruction("OP_GREATER", offset);
-    case Opcode::Less:
-      return SimpleInstruction("OP_LESS", offset);
-    case Opcode::Negate:
-      return SimpleInstruction("OP_NEGATE", offset);
-    case Opcode::Not:
-      return SimpleInstruction("OP_NOT", offset);
-    case Opcode::Jump:
-      return JumpInstruction("OP_JUMP", 1, offset);
+    case Opcode::Return:return SimpleInstruction("OP_RETURN", offset);
+    case Opcode::Constant:return ConstantInstruction("OP_CONSTANT", offset);
+    case Opcode::Add:return SimpleInstruction("OP_ADD", offset);
+    case Opcode::Subtract:return SimpleInstruction("OP_SUBTRACT", offset);
+    case Opcode::Multiply:return SimpleInstruction("OP_MULTIPLY", offset);
+    case Opcode::Divide:return SimpleInstruction("OP_DIVIDE", offset);
+    case Opcode::Equal:return SimpleInstruction("OP_EQUAL", offset);
+    case Opcode::Greater:return SimpleInstruction("OP_GREATER", offset);
+    case Opcode::Less:return SimpleInstruction("OP_LESS", offset);
+    case Opcode::Negate:return SimpleInstruction("OP_NEGATE", offset);
+    case Opcode::Not:return SimpleInstruction("OP_NOT", offset);
+    case Opcode::Jump:return JumpInstruction("OP_JUMP", 1, offset);
     case Opcode::JumpIfFalse:
-      return JumpInstruction("OP_JUMP_IF_FALSE", 1, offset);
-    case Opcode::Loop:
-      return JumpInstruction("OP_LOOP", -1, offset);
-    case Opcode::Pop:
-      return SimpleInstruction("OP_POP", offset);
-    case Opcode::Print:
-      return SimpleInstruction("OP_PRINT", offset);
+      return JumpInstruction("OP_JUMP_IF_FALSE",
+                             1,
+                             offset);
+    case Opcode::Loop:return JumpInstruction("OP_LOOP", -1, offset);
+    case Opcode::Pop:return SimpleInstruction("OP_POP", offset);
+    case Opcode::Print:return SimpleInstruction("OP_PRINT", offset);
   }
 }
 
@@ -188,7 +172,15 @@ int Bytecode::DisassembleInstruction(int offset) {
 //  // TODO: Throw exception.
 //}
 
-//std::ostream &operator<<(std::ostream &os, const Value &value) {
+std::ostream &operator<<(std::ostream &os, const Value &value) {
+  if (value.Type == ValueType::Number) {
+//    Value foobar = value;
+//    auto number = dynamic_cast<NumberValue *>(&foobar);
+    os << value.number;
+  } else {
+    os << "TODO!";
+  }
+
 //  std::visit([&os, &value](auto &&arg) {
 //    using T = std::decay_t<decltype(arg)>;
 //    if constexpr (std::is_same_v<T, double>) {
@@ -207,5 +199,5 @@ int Bytecode::DisassembleInstruction(int offset) {
 //    // TODO: Throw exception.
 //  }, value);
 
-//  return os;
-//}
+  return os;
+}

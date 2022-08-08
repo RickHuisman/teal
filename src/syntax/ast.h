@@ -125,9 +125,9 @@ struct PrintExpr : Expr {
 };
 
 struct LiteralExpr : Expr {
-  Value value;
+  std::unique_ptr<Value> value;
 
-  explicit LiteralExpr(const Value& v) : value(v) {};
+  explicit LiteralExpr(std::unique_ptr<Value> v) : value(std::move(v)) {};
 
   void Compile(Compiler *compiler) override;
 };

@@ -43,7 +43,7 @@ class Compiler {
   int emit_jump(Opcode opcode);
   void emit_loop(int loop_start);
   void patch_jump(int offset);
-  void emit_constant(Value value);
+  void emit_constant(std::unique_ptr<Value> value);
   void emit(Opcode opcode);
   void emit_byte(uint8_t byte);
   void add_local(Identifier name);

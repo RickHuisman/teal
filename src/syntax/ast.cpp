@@ -74,7 +74,7 @@ void PrintExpr::Compile(Compiler *compiler) {
 }
 
 void LiteralExpr::Compile(Compiler *compiler) {
-  compiler->emit_constant(value);
+  compiler->emit_constant(std::move(value));
 }
 
 void CallExpr::Compile(Compiler *compiler) {
