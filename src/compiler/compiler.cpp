@@ -5,7 +5,7 @@
 #include "bytecode.h"
 #include "syntax/parser.h"
 
-ObjFunction compile(std::string source) {
+std::unique_ptr<FunctionObj> compile(const std::string& source) {
   auto lexer = std::make_unique<Lexer>(source);
   auto tokens = lexer->Lex();
 
@@ -32,23 +32,26 @@ void Compiler::end_scope() {
   // TODO:
 }
 
-ObjFunction Compiler::end_compiler() {
+std::unique_ptr<FunctionObj> Compiler::end_compiler() {
   // TODO: Fix.
-  CurrentBytecode().DisassembleBytecode();
-  return current.function;
+  current.function->bytecode->DisassembleBytecode();
+
+  std::unique_ptr<FunctionObj> ret;
+  std::swap(ret, current.function);
+  return ret;
 }
 
 int Compiler::emit_jump(Opcode opcode) { // TODO: Int?
   emit(opcode);
   emit_byte(0xff);
   emit_byte(0xff);
-  return CurrentBytecode().Code().size() - 2;
+  return current.function->bytecode->Code().size() - 2;
 }
 
 void Compiler::emit_loop(int loop_start) { // TODO: Int?
   emit(Opcode::Loop);
 
-  auto sub = CurrentBytecode().Code().size() - loop_start + 2;
+  auto sub = current.function->bytecode->Code().size() - loop_start + 2;
 
   // TODO: Works?
   auto lo = ((sub >> 8) & 0xff);
@@ -60,24 +63,24 @@ void Compiler::emit_loop(int loop_start) { // TODO: Int?
 
 void Compiler::patch_jump(int offset) { // TODO: Int?
   // -2 to adjust for the bytecode for the jump offset itself.
-  auto jump = CurrentBytecode().Code().size() - offset - 2;
+  auto jump = current.function->bytecode->Code().size() - offset - 2;
 
-  CurrentBytecode().Code()[offset] = ((jump >> 8) & 0xff);
-  CurrentBytecode().Code()[offset + 1] = (jump & 0xff);
+  current.function->bytecode->Code()[offset] = ((jump >> 8) & 0xff);
+  current.function->bytecode->Code()[offset + 1] = (jump & 0xff);
 }
 
 void Compiler::emit_constant(Value value) {
-  auto index = CurrentBytecode().AddConstant(value);
+  auto index = current.function->bytecode->AddConstant(value);
   emit(Opcode::Constant);
   emit_byte(index);
 }
 
 void Compiler::emit(Opcode opcode) {
-  CurrentBytecode().Write(opcode);
+  current.function->bytecode->Write(opcode);
 }
 
 void Compiler::emit_byte(std::uint8_t byte) {
-  current.function.bytecode.WriteByte(byte);
+  current.function->bytecode->WriteByte(byte);
 }
 
 void Compiler::add_local(Identifier name) {
@@ -124,8 +127,4 @@ void Compiler::define_variable(Identifier *name) {
   // TODO:
 //  auto global = current_chunk()->add_constant(name);
 //  emitBytes(Opcode::define_global, global);
-}
-
-Bytecode Compiler::CurrentBytecode() {
-  return current.function.bytecode;
 }

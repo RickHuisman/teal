@@ -48,7 +48,7 @@ int Bytecode::ConstantInstruction(std::string name, int offset) {
             << name
             << toascii(constant) // TODO: toascii?
             << ' ';
-  std::cout << "'" << constants_[constant] << "'" << std::endl;
+//  std::cout << "'" << constants_[constant] << "'" << std::endl;
   return offset + 2;
 }
 
@@ -121,74 +121,74 @@ int Bytecode::DisassembleInstruction(int offset) {
   }
 }
 
-// TODO: Move to value.cpp.
-Value operator+(const Value &a, const Value &b) {
-  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-    return {a.numberValue + b.numberValue};
-  }
-  // TODO: Throw exception.
-}
+//// TODO: Move to value.cpp.
+//Value operator+(const Value &a, const Value &b) {
+//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
+//    return {a.numberValue + b.numberValue};
+//  }
+//  // TODO: Throw exception.
+//}
+//
+//Value operator-(const Value &a, const Value &b) {
+//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
+//    return {a.numberValue - b.numberValue};
+//  }
+//  // TODO: Throw exception.
+//}
+//
+//Value operator/(const Value &a, const Value &b) {
+//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
+//    return {a.numberValue - b.numberValue};
+//  }
+//  // TODO: Throw exception.
+//}
+//
+//Value operator*(const Value &a, const Value &b) {
+//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
+//    return {a.numberValue * b.numberValue};
+//  }
+//  // TODO: Throw exception.
+//}
+//
+//Value operator-(const Value &a) {
+//  if (a.type == ValueType::Double) {
+//    return {-a.numberValue};
+//  }
+//  // TODO: Throw exception.
+//}
+//
+//Value operator!(const Value &a) {
+//  if (a.type == ValueType::Bool) {
+//    return {!a.boolValue};
+//  }
+//  // TODO: Throw exception.
+//}
+//
+//Value operator==(const Value &a, const Value &b) {
+//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
+//    return {a.numberValue == b.numberValue};
+//  }
+//  if (a.type == ValueType::Bool && b.type == ValueType::Bool) {
+//    return {a.boolValue == b.boolValue};
+//  }
+//  // TODO: Throw exception.
+//}
+//
+//Value operator<(const Value &a, const Value &b) {
+//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
+//    return {a.numberValue < b.numberValue};
+//  }
+//  // TODO: Throw exception.
+//}
+//
+//Value operator>(const Value &a, const Value &b) {
+//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
+//    return {a.numberValue > b.numberValue};
+//  }
+//  // TODO: Throw exception.
+//}
 
-Value operator-(const Value &a, const Value &b) {
-  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-    return {a.numberValue - b.numberValue};
-  }
-  // TODO: Throw exception.
-}
-
-Value operator/(const Value &a, const Value &b) {
-  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-    return {a.numberValue - b.numberValue};
-  }
-  // TODO: Throw exception.
-}
-
-Value operator*(const Value &a, const Value &b) {
-  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-    return {a.numberValue * b.numberValue};
-  }
-  // TODO: Throw exception.
-}
-
-Value operator-(const Value &a) {
-  if (a.type == ValueType::Double) {
-    return {-a.numberValue};
-  }
-  // TODO: Throw exception.
-}
-
-Value operator!(const Value &a) {
-  if (a.type == ValueType::Bool) {
-    return {!a.boolValue};
-  }
-  // TODO: Throw exception.
-}
-
-Value operator==(const Value &a, const Value &b) {
-  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-    return {a.numberValue == b.numberValue};
-  }
-  if (a.type == ValueType::Bool && b.type == ValueType::Bool) {
-    return {a.boolValue == b.boolValue};
-  }
-  // TODO: Throw exception.
-}
-
-Value operator<(const Value &a, const Value &b) {
-  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-    return {a.numberValue < b.numberValue};
-  }
-  // TODO: Throw exception.
-}
-
-Value operator>(const Value &a, const Value &b) {
-  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-    return {a.numberValue > b.numberValue};
-  }
-  // TODO: Throw exception.
-}
-
-std::ostream &operator<<(std::ostream &os, const Value &value) {
+//std::ostream &operator<<(std::ostream &os, const Value &value) {
 //  std::visit([&os, &value](auto &&arg) {
 //    using T = std::decay_t<decltype(arg)>;
 //    if constexpr (std::is_same_v<T, double>) {
@@ -207,5 +207,5 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
 //    // TODO: Throw exception.
 //  }, value);
 
-  return os;
-}
+//  return os;
+//}

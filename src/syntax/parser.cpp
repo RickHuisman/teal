@@ -158,8 +158,8 @@ Expr *Parser::Binary(Expr *left, Token token) {
 }
 
 Expr *Parser::Int(Token token) {
-  auto value = std::stod(token.source.c_str());
-  return new LiteralExpr(float(value));
+  auto number = std::stod(token.source.c_str());
+  return new LiteralExpr(NumberValue(float(number)));
 }
 
 Expr *Parser::String(Token token) {

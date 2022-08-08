@@ -1,10 +1,11 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 #include <string>
 #include "../vm/opcode.h"
 
-struct Value;
+//struct Value;
 
 class Bytecode {
   std::vector<std::uint8_t> code_;
@@ -42,56 +43,89 @@ struct Obj {
   struct Obj *next;
 };
 
-struct ObjFunction {
+struct FunctionObj {
   std::string name;
-  Bytecode bytecode;
+  std::unique_ptr<Bytecode> bytecode;
   std::uint8_t arity = 0;
-};
 
-struct ObjClosure {
-  ObjFunction function;
-
-  ObjClosure(ObjFunction function) : function(function) {}
+  FunctionObj(std::string name,
+              std::unique_ptr<Bytecode> bytecode,
+              std::uint8_t arity) : name(std::move(name)),
+                                    bytecode(std::move(bytecode)),
+                                    arity(arity) {};
 };
 
 enum ValueType {
-  Double,
+  Number,
   Bool,
   Closure,
 };
 
-struct Value {
-  ValueType type;
-  double numberValue;
-  bool boolValue;
-  ObjClosure *closureValue; // TODO: Pointer?
+class Value {
+ public:
+  virtual ~Value() = default;
 
-  Value(double val) : numberValue(val), type(ValueType::Double) {
-  }
+  [[nodiscard]] ValueType Type() const { return type_; }
 
-  Value(bool val) : boolValue(val), type(ValueType::Bool) {
-  }
+ protected:
+  explicit Value(ValueType type) : type_(type) {}
 
-  Value(ObjClosure clos) : closureValue(&clos), type(ValueType::Closure) {
-  }
+ private:
+  ValueType type_;
 };
 
-Value operator+(const Value &a, const Value &b);
+struct NumberValue : public Value {
+  float number;
 
-Value operator-(const Value &a, const Value &b);
+  explicit NumberValue(float number)
+      : Value(ValueType::Number), number(number) {}
+};
 
-Value operator*(const Value &a, const Value &b);
+struct BoolValue : public Value {
+  bool bool_;
 
-Value operator/(const Value &a, const Value &b);
+  explicit BoolValue(bool bool_) : Value(ValueType::Bool), bool_(bool_) {}
+};
 
-Value operator==(const Value &a, const Value &b);
+struct ClosureValue : public Value {
+  FunctionObj *function;
 
-Value operator<(const Value &a, const Value &b);
+  explicit ClosureValue(FunctionObj *function)
+      : Value(ValueType::Closure), function(function) {}
+};
 
-Value operator>(const Value &a, const Value &b);
-
-Value operator-(const Value &a);
-
-Value operator!(const Value &a);
-
-std::ostream &operator<<(std::ostream &os, const Value &value);
+//struct Value {
+//  ValueType type;
+//  double numberValue;
+//  bool boolValue;
+//  std::unique_ptr<ClosureObj> closureValue;
+//
+//  Value(double val) : numberValue(val), type(ValueType::Double) {
+//  }
+//
+//  Value(bool val) : boolValue(val), type(ValueType::Bool) {
+//  }
+//
+//  Value(std::unique_ptr<ClosureObj> clos) : closureValue(std::move(clos)), type(ValueType::Closure) {
+//  }
+//};
+//
+//Value operator+(const Value &a, const Value &b);
+//
+//Value operator-(const Value &a, const Value &b);
+//
+//Value operator*(const Value &a, const Value &b);
+//
+//Value operator/(const Value &a, const Value &b);
+//
+//Value operator==(const Value &a, const Value &b);
+//
+//Value operator<(const Value &a, const Value &b);
+//
+//Value operator>(const Value &a, const Value &b);
+//
+//Value operator-(const Value &a);
+//
+//Value operator!(const Value &a);
+//
+//std::ostream &operator<<(std::ostream &os, const Value &value);

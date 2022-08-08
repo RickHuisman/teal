@@ -127,7 +127,7 @@ struct PrintExpr : Expr {
 struct LiteralExpr : Expr {
   Value value;
 
-  explicit LiteralExpr(Value v) : value(v) {};
+  explicit LiteralExpr(const Value& v) : value(v) {};
 
   void Compile(Compiler *compiler) override;
 };

@@ -3,9 +3,12 @@
 #include "../compiler/bytecode.h"
 
 struct CallFrame {
-  ObjClosure closure;
+  std::unique_ptr<ClosureValue> closure;
   std::uint8_t ip;
-  std::uint8_t stack_size;
+  std::uint8_t stack_start;
+
+  CallFrame(std::unique_ptr<ClosureValue> closure, std::uint8_t stack_start)
+      : closure(std::move(closure)), ip(0), stack_start(stack_start) {}
 };
 
 class VM {
@@ -16,18 +19,19 @@ class VM {
 
   std::uint8_t read_byte();
   std::uint16_t read_short();
-  CallFrame current_frame();
+  CallFrame *current_frame();
 
  public:
   explicit VM() {
     // TODO: Init stack & frames with fixed size.
   }
 
-  void interpret(std::string source); // TODO: Return interpret result.
+  void interpret(const std::string &source); // TODO: Return interpret result.
   void interpret_with_output(std::string source,
                              std::stringstream *buffer); // TODO: Return interpret result.
   void run();
   Value read_constant();
+  Bytecode *current_bytecode();
   void constant();
   void push(Value value);
   Value pop();
@@ -44,4 +48,6 @@ class VM {
   void jump_if_false();
   void loop();
   void print();
+  void CallValue(std::uint8_t arity);
+  void Call(ClosureValue *closure, std::uint8_t arity);
 };
