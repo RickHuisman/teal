@@ -52,6 +52,8 @@ struct Token {
       : type(type), source(std::move(source)) {}
 };
 
+bool operator==(const Token &a, const Token &b);
+
 class Lexer {
   int current;
   std::string source;

@@ -3,7 +3,7 @@
 #include <iostream>
 
 void Bytecode::Write(Opcode opcode) {
-  code_.push_back(static_cast<const unsigned char>(opcode)); // TODO: Works?
+  code_.push_back(static_cast<std::uint8_t>(opcode)); // TODO: Works?
 }
 
 void Bytecode::WriteByte(std::uint8_t byte) {
@@ -31,12 +31,12 @@ void Bytecode::DisassembleBytecode() {
   }
 }
 
-int Bytecode::SimpleInstruction(const std::string& name, int offset) {
+int Bytecode::SimpleInstruction(const std::string &name, int offset) {
   std::cout << name << std::endl;
   return offset + 1;
 }
 
-int Bytecode::ConstantInstruction(const std::string& name, int offset) {
+int Bytecode::ConstantInstruction(const std::string &name, int offset) {
   auto constant = code_[offset + 1];
   std::cout << std::setw(16)
             << std::left
@@ -49,7 +49,7 @@ int Bytecode::ConstantInstruction(const std::string& name, int offset) {
   return offset + 2;
 }
 
-int Bytecode::JumpInstruction(const std::string& name, int sign, int offset) {
+int Bytecode::JumpInstruction(const std::string &name, int sign, int offset) {
   uint16_t jump = (uint16_t) code_[offset + 1] << 8;
   jump |= code_[offset + 2];
 
@@ -136,14 +136,14 @@ Value operator*(const Value &a, const Value &b) {
 
 Value operator-(const Value &a) {
   if (a.Type == ValueType::Number) {
-    return Value(-a);
+    return Value(-a.number);
   }
   throw std::exception();
 }
 
 Value operator!(const Value &a) {
   if (a.Type == ValueType::Bool) {
-    return Value(!a.number);
+    return Value(!a.bool_);
   }
   throw std::exception();
 }
@@ -155,7 +155,7 @@ Value operator==(const Value &a, const Value &b) {
   if (a.Type == ValueType::Bool && b.Type == ValueType::Bool) {
     return Value(a.bool_ == b.bool_);
   }
-  throw std::exception();
+  return Value(false);
 }
 
 Value operator<(const Value &a, const Value &b) {
@@ -174,8 +174,7 @@ Value operator>(const Value &a, const Value &b) {
 
 std::ostream &operator<<(std::ostream &os, const Value &value) {
   switch (value.Type) {
-    case Number:
-      os << value.number;
+    case Number:os << value.number;
       break;
     case Bool:
       if (value.bool_) {
@@ -184,8 +183,7 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
         os << "false";
       }
       break;
-    case Closure:
-      os << "CLOSURE";
+    case Closure:os << "CLOSURE";
       break;
   }
 

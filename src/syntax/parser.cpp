@@ -181,10 +181,11 @@ Expr *Parser::Call(Expr *left, Token token) {
 }
 
 Expr *Parser::Literal(Token token) {
-  throw "TODO";
-//  if (token.type == TokenType::True) return new LiteralExpr(true);
-//  if (token.type == TokenType::False) return new LiteralExpr(false);
-  // TODO: Throw exception.
+  if (token.type == TokenType::True)
+    return new LiteralExpr(std::make_unique<Value>(true));
+  if (token.type == TokenType::False)
+    return new LiteralExpr(std::make_unique<Value>(false));
+  throw std::exception();
 }
 
 Expr *Parser::ParseIdent(Token token) {

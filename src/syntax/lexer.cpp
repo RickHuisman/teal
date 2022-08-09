@@ -173,3 +173,7 @@ bool Lexer::Check(char c) {
 bool Lexer::IsAtEnd() {
   return source[current] == '\0';
 }
+
+bool operator==(const Token &a, const Token &b) {
+  return a.type == b.type && a.source == b.source;
+}

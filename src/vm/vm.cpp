@@ -18,6 +18,10 @@ void VM::interpret(const std::string& source) {
 void VM::interpret_with_output(std::string source, std::stringstream *buffer) {
   auto fun = compile(source);
   output = buffer;
+
+  auto closure = ClosureValue(fun.get());
+  push(std::make_unique<Value>(closure));
+  CallValue(0);
   run();
 }
 
@@ -93,12 +97,6 @@ void VM::constant() {
   push(std::move(read_constant()));
 }
 
-template<class Func> void VM::binary(Func func) {
-  auto b = pop();
-  auto a = pop();
-  func(a, b);
-}
-
 void VM::add() {
   auto b = pop().release();
   auto a = pop().release();
@@ -167,6 +165,7 @@ void VM::loop() {
 void VM::print() {
   auto popped = pop().release();
   std::cout << *popped << std::endl;
+  *output << *popped << std::endl;
 }
 
 void VM::CallValue(std::uint8_t arity) {
@@ -206,6 +205,8 @@ std::unique_ptr<Value> VM::read_constant() {
   // TODO:
   if (constant->Type == ValueType::Number) {
     return std::make_unique<Value>(constant->number);
+  } else if (constant->Type == ValueType::Bool) {
+    return std::make_unique<Value>(constant->bool_);
   }
 
   throw std::exception();

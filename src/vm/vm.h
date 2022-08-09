@@ -47,7 +47,6 @@ class VM {
   void jump_if_false();
   void loop();
   void print();
-  template<class Func> void binary(Func func);
   void CallValue(std::uint8_t arity);
   void Call(ClosureValue closure, std::uint8_t arity);
 };
