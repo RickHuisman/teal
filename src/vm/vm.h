@@ -50,6 +50,7 @@ class VM {
   void print();
   void DefineGlobal();
   void GetGlobal();
+  void SetGlobal();
   void CallValue(std::uint8_t arity);
   void Call(ClosureValue closure, std::uint8_t arity);
 };

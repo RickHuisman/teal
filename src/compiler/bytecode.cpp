@@ -104,6 +104,7 @@ int Bytecode::DisassembleInstruction(int offset) {
     case Opcode::Print:return SimpleInstruction("OP_PRINT", offset);
     case Opcode::DefineGlobal:return ConstantInstruction("OP_DEFINE_GLOBAL", offset);
     case Opcode::GetGlobal:return ConstantInstruction("OP_GET_GLOBAL", offset);
+    case Opcode::SetGlobal:return ConstantInstruction("OP_SET_GLOBAL", offset);
   }
 }
 

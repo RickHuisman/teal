@@ -45,7 +45,15 @@ void LetAssignExpr::Compile(Compiler *compiler) {
 }
 
 void LetSetExpr::Compile(Compiler *compiler) {
-  std::cout << "let set\n";
+  expr->Compile(compiler);
+
+  // Global variable
+  compiler->emit(Opcode::SetGlobal);
+  auto stringVal = std::make_unique<Value>(ident);
+  auto constant_id = compiler->current.function->bytecode->AddConstant(
+      std::move(stringVal)
+  );
+  compiler->emit_byte(constant_id);
 }
 
 void LetGetExpr::Compile(Compiler *compiler) {

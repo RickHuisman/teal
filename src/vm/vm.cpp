@@ -3,7 +3,7 @@
 #include <sstream>
 #include <compiler/compiler.h>
 
-void VM::interpret(const std::string& source) {
+void VM::interpret(const std::string &source) {
   // TODO: Use interpret_with_output.
   output = &std::cout;
 
@@ -14,7 +14,8 @@ void VM::interpret(const std::string& source) {
   run();
 }
 
-void VM::interpret_with_output(const std::string &source, std::stringstream *buffer) {
+void VM::interpret_with_output(const std::string &source,
+                               std::stringstream *buffer) {
   auto fun = compile(source);
   output = buffer;
 
@@ -28,59 +29,43 @@ void VM::run() {
   while (!frames.empty()) {
     auto instruction = static_cast<Opcode>(read_byte());
     switch (instruction) {
-      case Opcode::Return:
-        return_();
+      case Opcode::Return:return_();
         break;
-      case Opcode::Constant:
-        constant();
+      case Opcode::Constant:constant();
         break;
-      case Opcode::Add:
-        add();
+      case Opcode::Add:add();
         break;
-      case Opcode::Subtract:
-        subtract();
+      case Opcode::Subtract:subtract();
         break;
-      case Opcode::Multiply:
-        multiply();
+      case Opcode::Multiply:multiply();
         break;
-      case Opcode::Divide:
-        divide();
+      case Opcode::Divide:divide();
         break;
-      case Opcode::Negate:
-        negate();
+      case Opcode::Negate:negate();
         break;
-      case Opcode::Not:
-        not_();
+      case Opcode::Not:not_();
         break;
-      case Opcode::Equal:
-        equal();
+      case Opcode::Equal:equal();
         break;
-      case Opcode::Greater:
-        greater();
+      case Opcode::Greater:greater();
         break;
-      case Opcode::Less:
-        less();
+      case Opcode::Less:less();
         break;
-      case Opcode::Jump:
-        jump();
+      case Opcode::Jump:jump();
         break;
-      case Opcode::JumpIfFalse:
-        jump_if_false();
+      case Opcode::JumpIfFalse:jump_if_false();
         break;
-      case Opcode::Loop:
-        loop();
+      case Opcode::Loop:loop();
         break;
-      case Opcode::Pop:
-        pop();
+      case Opcode::Pop:pop();
         break;
-      case Opcode::Print:
-        print();
+      case Opcode::Print:print();
         break;
-      case Opcode::DefineGlobal:
-        DefineGlobal();
+      case Opcode::DefineGlobal:DefineGlobal();
         break;
-      case Opcode::GetGlobal:
-        GetGlobal();
+      case Opcode::GetGlobal:GetGlobal();
+        break;
+      case Opcode::SetGlobal:SetGlobal();
         break;
     }
   }
@@ -181,18 +166,38 @@ void VM::DefineGlobal() {
 void VM::GetGlobal() {
   auto name = ReadString();
 
-  if(globals.find(name) == globals.end()) {
+  if (globals.find(name) == globals.end()) {
     throw std::exception();
-  } else {
-    auto value = std::move(globals.at(name));
+  }
 
-    if (value->Type == ValueType::Number) {
-      push(std::make_unique<Value>(value->number));
-    } else if (value->Type == ValueType::Bool) {
-      push(std::make_unique<Value>(value->bool_));
-    } else if (value->Type == ValueType::String) {
-      push(std::make_unique<Value>(value->string_));
-    }
+  auto value = std::move(globals.at(name));
+
+  if (value->Type == ValueType::Number) {
+    push(std::make_unique<Value>(value->number));
+  } else if (value->Type == ValueType::Bool) {
+    push(std::make_unique<Value>(value->bool_));
+  } else if (value->Type == ValueType::String) {
+    push(std::make_unique<Value>(value->string_));
+  }
+}
+
+void VM::SetGlobal() {
+  auto name = ReadString();
+
+  if (globals.count(name) == 0) {
+    throw std::exception();
+  }
+
+  auto value = stack.back().get();
+
+  if (value->Type == ValueType::Number) {
+    globals[name] = std::make_unique<Value>(value->number);
+  } else if (value->Type == ValueType::Bool) {
+    globals[name] = std::make_unique<Value>(value->bool_);
+    push(std::make_unique<Value>(value->bool_));
+  } else if (value->Type == ValueType::String) {
+    globals[name] = std::make_unique<Value>(value->string_);
+    push(std::make_unique<Value>(value->string_));
   }
 }
 
