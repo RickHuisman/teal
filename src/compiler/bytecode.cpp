@@ -106,98 +106,88 @@ int Bytecode::DisassembleInstruction(int offset) {
 }
 
 //// TODO: Move to value.cpp.
-//Value operator+(const Value &a, const Value &b) {
-//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-//    return {a.numberValue + b.numberValue};
-//  }
-//  // TODO: Throw exception.
-//}
-//
-//Value operator-(const Value &a, const Value &b) {
-//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-//    return {a.numberValue - b.numberValue};
-//  }
-//  // TODO: Throw exception.
-//}
-//
-//Value operator/(const Value &a, const Value &b) {
-//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-//    return {a.numberValue - b.numberValue};
-//  }
-//  // TODO: Throw exception.
-//}
-//
-//Value operator*(const Value &a, const Value &b) {
-//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-//    return {a.numberValue * b.numberValue};
-//  }
-//  // TODO: Throw exception.
-//}
-//
-//Value operator-(const Value &a) {
-//  if (a.type == ValueType::Double) {
-//    return {-a.numberValue};
-//  }
-//  // TODO: Throw exception.
-//}
-//
-//Value operator!(const Value &a) {
-//  if (a.type == ValueType::Bool) {
-//    return {!a.boolValue};
-//  }
-//  // TODO: Throw exception.
-//}
-//
-//Value operator==(const Value &a, const Value &b) {
-//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-//    return {a.numberValue == b.numberValue};
-//  }
-//  if (a.type == ValueType::Bool && b.type == ValueType::Bool) {
-//    return {a.boolValue == b.boolValue};
-//  }
-//  // TODO: Throw exception.
-//}
-//
-//Value operator<(const Value &a, const Value &b) {
-//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-//    return {a.numberValue < b.numberValue};
-//  }
-//  // TODO: Throw exception.
-//}
-//
-//Value operator>(const Value &a, const Value &b) {
-//  if (a.type == ValueType::Double && b.type == ValueType::Double) {
-//    return {a.numberValue > b.numberValue};
-//  }
-//  // TODO: Throw exception.
-//}
+Value operator+(const Value &a, const Value &b) {
+  if (a.Type == ValueType::Number && b.Type == ValueType::Number) {
+    return Value(a.number + b.number);
+  }
+  throw std::exception();
+}
+
+Value operator-(const Value &a, const Value &b) {
+  if (a.Type == ValueType::Number && b.Type == ValueType::Number) {
+    return Value(a.number - b.number);
+  }
+  throw std::exception();
+}
+
+Value operator/(const Value &a, const Value &b) {
+  if (a.Type == ValueType::Number && b.Type == ValueType::Number) {
+    return Value(a.number / b.number);
+  }
+  throw std::exception();
+}
+
+Value operator*(const Value &a, const Value &b) {
+  if (a.Type == ValueType::Number && b.Type == ValueType::Number) {
+    return Value(a.number * b.number);
+  }
+  throw std::exception();
+}
+
+Value operator-(const Value &a) {
+  if (a.Type == ValueType::Number) {
+    return Value(-a);
+  }
+  throw std::exception();
+}
+
+Value operator!(const Value &a) {
+  if (a.Type == ValueType::Bool) {
+    return Value(!a.number);
+  }
+  throw std::exception();
+}
+
+Value operator==(const Value &a, const Value &b) {
+  if (a.Type == ValueType::Number && b.Type == ValueType::Number) {
+    return Value(a.number == b.number);
+  }
+  if (a.Type == ValueType::Bool && b.Type == ValueType::Bool) {
+    return Value(a.bool_ == b.bool_);
+  }
+  throw std::exception();
+}
+
+Value operator<(const Value &a, const Value &b) {
+  if (a.Type == ValueType::Number && b.Type == ValueType::Number) {
+    return Value(a.number < b.number);
+  }
+  throw std::exception();
+}
+
+Value operator>(const Value &a, const Value &b) {
+  if (a.Type == ValueType::Number && b.Type == ValueType::Number) {
+    return Value(a.number > b.number);
+  }
+  throw std::exception();
+}
 
 std::ostream &operator<<(std::ostream &os, const Value &value) {
-  if (value.Type == ValueType::Number) {
-//    Value foobar = value;
-//    auto number = dynamic_cast<NumberValue *>(&foobar);
-    os << value.number;
-  } else {
-    os << "TODO!";
+  switch (value.Type) {
+    case Number:
+      os << value.number;
+      break;
+    case Bool:
+      if (value.bool_) {
+        os << "true";
+      } else {
+        os << "false";
+      }
+      break;
+    case Closure:
+      os << "CLOSURE";
+      break;
   }
-
-//  std::visit([&os, &value](auto &&arg) {
-//    using T = std::decay_t<decltype(arg)>;
-//    if constexpr (std::is_same_v<T, double>) {
-//      os << std::get<double>(value);
-//    }
-//    if constexpr(std::is_same_v<T, bool>) {
-//      if (std::get<bool>(value)) {
-//        os << "true";
-//      } else {
-//        os << "false";
-//      }
-//    }
-//    // if constexpr(std::is_same_v<T, std::string>) {
-//    //   os << std::get<std::string>(value);
-//    // }
-//    // TODO: Throw exception.
-//  }, value);
 
   return os;
 }

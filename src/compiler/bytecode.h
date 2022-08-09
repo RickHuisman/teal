@@ -59,10 +59,14 @@ struct Value {
   ValueType Type;
 
   float number;
+  bool bool_;
   std::unique_ptr<ClosureValue> closure;
 
   explicit Value(float n)
       : Type(ValueType::Number), number(n), closure(nullptr) {}
+
+  explicit Value(bool b)
+      : Type(ValueType::Bool), bool_(b), closure(nullptr) {}
 
   explicit Value(ClosureValue closure)
       : Type(ValueType::Closure),
@@ -75,22 +79,22 @@ struct Value {
         number(0) {}
 };
 
-//Value operator+(const Value &a, const Value &b);
-//
-//Value operator-(const Value &a, const Value &b);
-//
-//Value operator*(const Value &a, const Value &b);
-//
-//Value operator/(const Value &a, const Value &b);
-//
-//Value operator==(const Value &a, const Value &b);
-//
-//Value operator<(const Value &a, const Value &b);
-//
-//Value operator>(const Value &a, const Value &b);
-//
-//Value operator-(const Value &a);
-//
-//Value operator!(const Value &a);
+Value operator+(const Value &a, const Value &b);
+
+Value operator-(const Value &a, const Value &b);
+
+Value operator*(const Value &a, const Value &b);
+
+Value operator/(const Value &a, const Value &b);
+
+Value operator==(const Value &a, const Value &b);
+
+Value operator<(const Value &a, const Value &b);
+
+Value operator>(const Value &a, const Value &b);
+
+Value operator-(const Value &a);
+
+Value operator!(const Value &a);
 
 std::ostream &operator<<(std::ostream &os, const Value &value);

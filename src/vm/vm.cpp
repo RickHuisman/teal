@@ -93,56 +93,62 @@ void VM::constant() {
   push(std::move(read_constant()));
 }
 
-void VM::add() {
+template<class Func> void VM::binary(Func func) {
   auto b = pop();
   auto a = pop();
-//  push(a + b);
+  func(a, b);
+}
+
+void VM::add() {
+  auto b = pop().release();
+  auto a = pop().release();
+  push(std::make_unique<Value>(*a + *b));
 }
 
 void VM::subtract() {
-  auto b = pop();
-  auto a = pop();
-//  push(a - b);
+  auto b = pop().release();
+  auto a = pop().release();
+  push(std::make_unique<Value>(*a - *b));
 }
 
 void VM::multiply() {
-  auto b = pop();
-  auto a = pop();
-//  push(a * b);
+  auto b = pop().release();
+  auto a = pop().release();
+  push(std::make_unique<Value>(*a * *b));
 }
 
 void VM::divide() {
-  auto b = pop();
-  auto a = pop();
-//  push(a / b);
+  auto b = pop().release();
+  auto a = pop().release();
+  push(std::make_unique<Value>(*a / *b));
 }
 
 void VM::negate() {
-  auto a = pop();
-//  push(-a);
+  auto a = pop().release();
+  push(std::make_unique<Value>(-*a));
 }
 
 void VM::not_() {
-  auto a = pop();
-//  push(!a);
+  auto a = pop().release();
+  push(std::make_unique<Value>(!*a));
 }
 
 void VM::equal() {
-  auto b = pop();
-  auto a = pop();
-//  push(a == b);
+  auto b = pop().release();
+  auto a = pop().release();
+  push(std::make_unique<Value>(*a == *b));
 }
 
 void VM::greater() {
-  auto b = pop();
-  auto a = pop();
-//  push(a > b);
+  auto b = pop().release();
+  auto a = pop().release();
+  push(std::make_unique<Value>(*a > *b));
 }
 
 void VM::less() {
-  auto b = pop();
-  auto a = pop();
-//  push(a < b);
+  auto b = pop().release();
+  auto a = pop().release();
+  push(std::make_unique<Value>(*a < *b));
 }
 
 void VM::jump() {
@@ -159,13 +165,8 @@ void VM::loop() {
 }
 
 void VM::print() {
-  auto popped = pop();
-
-  if (popped->Type == ValueType::Number) {
-    std::cout << popped->number << std::endl;
-  } else {
-    std::cout << "TODO!" << std::endl;
-  }
+  auto popped = pop().release();
+  std::cout << *popped << std::endl;
 }
 
 void VM::CallValue(std::uint8_t arity) {
@@ -173,18 +174,15 @@ void VM::CallValue(std::uint8_t arity) {
   auto callee = &stack[frame_start];
 
   if (callee->get()->Type == ValueType::Closure) {
-//    auto *clos = dynamic_cast<ClosureValue*>(callee->get()); TODO
     Call(*callee->get()->closure, arity);
   } else {
     throw std::exception();
-//      _ => return Err(RuntimeError::InvalidCallee),
   }
 }
 
 void VM::Call(ClosureValue closure, std::uint8_t arity) {
   if (arity != closure.function->arity) {
     throw std::exception();
-//    return Err(RuntimeError::IncorrectArity);
   }
 
   auto frame_start = stack.size() - (arity + 1);
@@ -205,6 +203,7 @@ std::unique_ptr<Value> VM::read_constant() {
   auto index = read_byte();
   auto constant = current_bytecode()->ReadConstant(index);
 
+  // TODO:
   if (constant->Type == ValueType::Number) {
     return std::make_unique<Value>(constant->number);
   }

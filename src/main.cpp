@@ -15,19 +15,9 @@ void CompileAndRun(const std::string& source) {
 }
 
 int main() {
-  auto source = R"(print 10;)";
+  auto source = R"(print 2 < 3;)";
 
   CompileAndRun(source);
-
-//  std::vector<Value*> values;
-//
-//  values.push_back(new NumberValue(10.0));
-//
-//  auto value = values[0];
-//
-//  auto *number = dynamic_cast<NumberValue*>(value);
-//
-//  std::cout << number->number << std::endl;
 
   return 0;
 }
