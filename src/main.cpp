@@ -9,9 +9,9 @@ void CompileAndRun(const std::string& source) {
 
 int main() {
   auto source = R"(
-let x = 10;
-x = 4;
-print x;
+def foobar()
+  print 5;
+end
 )";
 
   CompileAndRun(source);

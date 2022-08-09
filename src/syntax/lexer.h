@@ -14,7 +14,6 @@ enum class TokenType {
   Dot,
   Minus,
   Plus,
-  Semicolon,
   Slash,
   Star,
 
@@ -28,7 +27,6 @@ enum class TokenType {
   LessEqual,
 
   Identifier,
-  String,
   Number,
 
   Let,
@@ -37,9 +35,12 @@ enum class TokenType {
   False,
   If,
   Else,
-  Fun,
+  Def,
+  Do,
+  End,
   Return,
 
+  Line,
   Error,
   Eof,
 };
@@ -62,7 +63,6 @@ class Lexer {
   static TokenType IdentifierType(const std::string &identifier);
   Token Identifier();
   Token Number();
-  Token String();
   Token MakeToken(TokenType type);
   void SkipWhitespace();
   char Match(char expected);

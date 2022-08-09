@@ -11,6 +11,12 @@ std::vector<Token> Lexer::Lex() {
     }
   }
 
+  // TODO: Find a cleaner way to do this.
+  if (tokens.back().type != TokenType::Eof) {
+    Token eof(TokenType::Eof, "");
+    tokens.push_back(eof);
+  }
+
   return tokens;
 }
 
@@ -25,24 +31,14 @@ std::optional<Token> Lexer::ScanToken() {
   if (isdigit(c)) return Number();
 
   switch (c) {
-    case '(':
-      return MakeToken(TokenType::LeftParen);
-    case ')':
-      return MakeToken(TokenType::RightParen);
-    case '{':
-      return MakeToken(TokenType::LeftBrace);
-    case '}':
-      return MakeToken(TokenType::RightBrace);
-    case ';':
-      return MakeToken(TokenType::Semicolon);
-    case ',':
-      return MakeToken(TokenType::Comma);
-    case '.':
-      return MakeToken(TokenType::Dot);
-    case '-':
-      return MakeToken(TokenType::Minus);
-    case '+':
-      return MakeToken(TokenType::Plus);
+    case '(':return MakeToken(TokenType::LeftParen);
+    case ')':return MakeToken(TokenType::RightParen);
+    case '{':return MakeToken(TokenType::LeftBrace);
+    case '}':return MakeToken(TokenType::RightBrace);
+    case ',':return MakeToken(TokenType::Comma);
+    case '.':return MakeToken(TokenType::Dot);
+    case '-':return MakeToken(TokenType::Minus);
+    case '+':return MakeToken(TokenType::Plus);
     case '/': {
       // Ignore comments.
       if (Check('/')) {
@@ -56,8 +52,7 @@ std::optional<Token> Lexer::ScanToken() {
 
       return MakeToken(TokenType::Slash);
     }
-    case '*':
-      return MakeToken(TokenType::Star);
+    case '*':return MakeToken(TokenType::Star);
     case '!':
       return MakeToken(Match('=') ? TokenType::BangEqual : TokenType::Bang);
     case '=':
@@ -65,9 +60,12 @@ std::optional<Token> Lexer::ScanToken() {
     case '<':
       return MakeToken(Match('=') ? TokenType::LessEqual : TokenType::Less);
     case '>':
-      return MakeToken(Match('=') ? TokenType::GreaterEqual : TokenType::Greater);
-    case '"':
-      return String();
+      return MakeToken(Match('=') ? TokenType::GreaterEqual
+                                  : TokenType::Greater);
+    case ';':
+    case '\n':
+    case '\r':Token token(TokenType::Line, "");
+      return token;
   }
 
   return MakeToken(TokenType::Error);
@@ -75,12 +73,14 @@ std::optional<Token> Lexer::ScanToken() {
 
 TokenType Lexer::IdentifierType(const std::string &source) {
   if (source == "let") return TokenType::Let;
+  if (source == "do") return TokenType::Do;
+  if (source == "end") return TokenType::End;
   if (source == "print") return TokenType::Print;
   if (source == "true") return TokenType::True;
   if (source == "false") return TokenType::False;
   if (source == "if") return TokenType::If;
   if (source == "else") return TokenType::Else;
-  if (source == "fun") return TokenType::Fun;
+  if (source == "def") return TokenType::Def;
   if (source == "return") return TokenType::Return;
 
   return TokenType::Identifier;
@@ -114,21 +114,6 @@ Token Lexer::Number() {
   return token;
 }
 
-Token Lexer::String() {
-  int start = current - 1;
-
-  while (Peek() != '"' && !IsAtEnd()) {
-    Advance();
-  }
-
-  // The closing quote.
-  Advance();
-
-  auto token_source = source.substr(start, current - start);
-  Token token(TokenType::String, token_source);
-  return token;
-}
-
 Token Lexer::MakeToken(TokenType token_type) {
   Token token(token_type, std::string(1, source[current - 1]));
   return token;
@@ -136,7 +121,7 @@ Token Lexer::MakeToken(TokenType token_type) {
 
 void Lexer::SkipWhitespace() {
   for (;;) {
-    if (isspace(Peek())) {
+    if (Peek() == ' ' || Peek() == '\t') {
       Advance();
     } else return;
   }

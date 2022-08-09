@@ -16,7 +16,7 @@ Expr *Parser::Declaration() {
   if (Match(TokenType::If)) return ParseIf();
   if (Match(TokenType::LeftBrace)) return ParseBlock();
   if (Match(TokenType::Print)) return ParsePrint();
-  if (Match(TokenType::Fun)) return ParseFun();
+  if (Match(TokenType::Def)) return ParseDef();
   if (Match(TokenType::Return)) return ParseReturn();
 
   return ExprStatement();
@@ -59,7 +59,7 @@ Expr *Parser::ParsePrint() {
   return new PrintExpr(expr);
 }
 
-Expr *Parser::ParseFun() {
+Expr *Parser::ParseDef() {
   auto ident = Consume(TokenType::Identifier, "TODO");
 
   // Parameters.
@@ -88,7 +88,7 @@ Expr *Parser::ParseFun() {
 
 Expr *Parser::ParseReturn() {
   std::optional<Expr *> expr;
-  if (!Match(TokenType::Semicolon)) {
+  if (!Match(TokenType::Line)) { // TODO: Check (changed from ';' -> Line).
     expr = ExprStatement();
   }
 
@@ -97,7 +97,8 @@ Expr *Parser::ParseReturn() {
 
 Expr *Parser::ExprStatement() {
   auto expr = Expression();
-  Consume(TokenType::Semicolon, "Expect ';' after expression.");
+  Consume(TokenType::Line,
+          "Expect ';' after expression.");  // TODO: Check (changed from ';' -> Line).
   return expr;
 }
 

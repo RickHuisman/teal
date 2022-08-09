@@ -59,27 +59,30 @@ class Parser {
   };
 
   std::map<TokenType, Parselet> rules{
-      {TokenType::Minus,        {&Parser::Unary,      &Parser::Binary, Precedence::Term}},
-      {TokenType::Plus,         {nullptr,             &Parser::Binary, Precedence::Term}},
-      {TokenType::Slash,        {nullptr,             &Parser::Binary, Precedence::Factor}},
-      {TokenType::Star,         {nullptr,             &Parser::Binary, Precedence::Factor}},
-      {TokenType::Equal,        {nullptr,             &Parser::Binary, Precedence::None}},
-      {TokenType::EqualEqual,   {nullptr,             &Parser::Binary, Precedence::Equality}},
-      {TokenType::Bang,         {&Parser::Unary,      nullptr,         Precedence::Term}},
-      {TokenType::BangEqual,    {nullptr,             &Parser::Binary, Precedence::Comparison}},
-      {TokenType::Greater,      {nullptr,             &Parser::Binary, Precedence::Comparison}},
-      {TokenType::GreaterEqual, {nullptr,             &Parser::Binary, Precedence::Comparison}},
-      {TokenType::Less,         {nullptr,             &Parser::Binary, Precedence::Comparison}},
-      {TokenType::LessEqual,    {nullptr,             &Parser::Binary, Precedence::Comparison}},
-      {TokenType::Semicolon,    {nullptr,             nullptr,         Precedence::None}},
-      {TokenType::Identifier,   {&Parser::ParseIdent, nullptr,         Precedence::None}},
-      {TokenType::True,         {&Parser::Literal,    nullptr,         Precedence::None}},
-      {TokenType::False,        {&Parser::Literal,    nullptr,         Precedence::None}},
-      {TokenType::Number,       {&Parser::ParseNumber, nullptr, Precedence::None}},
-      {TokenType::LeftParen,    {nullptr,             &Parser::Call,   Precedence::Call}},
+      {TokenType::Minus, {&Parser::Unary, &Parser::Binary, Precedence::Term}},
+      {TokenType::Plus, {nullptr, &Parser::Binary, Precedence::Term}},
+      {TokenType::Slash, {nullptr, &Parser::Binary, Precedence::Factor}},
+      {TokenType::Star, {nullptr, &Parser::Binary, Precedence::Factor}},
+      {TokenType::Equal, {nullptr, &Parser::Binary, Precedence::None}},
+      {TokenType::EqualEqual, {nullptr, &Parser::Binary, Precedence::Equality}},
+      {TokenType::Bang, {&Parser::Unary, nullptr, Precedence::Term}},
+      {TokenType::BangEqual,
+       {nullptr, &Parser::Binary, Precedence::Comparison}},
+      {TokenType::Greater, {nullptr, &Parser::Binary, Precedence::Comparison}},
+      {TokenType::GreaterEqual,
+       {nullptr, &Parser::Binary, Precedence::Comparison}},
+      {TokenType::Less, {nullptr, &Parser::Binary, Precedence::Comparison}},
+      {TokenType::LessEqual,
+       {nullptr, &Parser::Binary, Precedence::Comparison}},
+      {TokenType::Line, {nullptr, nullptr, Precedence::None}},
+      {TokenType::Identifier, {&Parser::ParseIdent, nullptr, Precedence::None}},
+      {TokenType::True, {&Parser::Literal, nullptr, Precedence::None}},
+      {TokenType::False, {&Parser::Literal, nullptr, Precedence::None}},
+      {TokenType::Number, {&Parser::ParseNumber, nullptr, Precedence::None}},
+      {TokenType::LeftParen, {nullptr, &Parser::Call, Precedence::Call}},
   };
 
-public:
+ public:
   std::vector<Expr *> Parse();
 
   Parser(std::vector<Token> tks) {
@@ -88,5 +91,5 @@ public:
     tokens = tks;
   }
 
-  Expr *ParseFun();
+  Expr *ParseDef();
 };
