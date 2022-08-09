@@ -8,7 +8,10 @@ void CompileAndRun(const std::string& source) {
 }
 
 int main() {
-  auto source = R"(print !true;)";
+  auto source = R"(
+let x = 10;
+print x;
+)";
 
   CompileAndRun(source);
 

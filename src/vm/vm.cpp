@@ -5,7 +5,6 @@
 
 void VM::interpret(const std::string& source) {
   // TODO: Use interpret_with_output.
-  // interpret_with_output(source, dynamic_cast<std::stringstream *>(&std::cout));
   output = &std::cout;
 
   auto fun = compile(source);
@@ -15,7 +14,7 @@ void VM::interpret(const std::string& source) {
   run();
 }
 
-void VM::interpret_with_output(std::string source, std::stringstream *buffer) {
+void VM::interpret_with_output(const std::string &source, std::stringstream *buffer) {
   auto fun = compile(source);
   output = buffer;
 
@@ -76,6 +75,12 @@ void VM::run() {
         break;
       case Opcode::Print:
         print();
+        break;
+      case Opcode::DefineGlobal:
+        DefineGlobal();
+        break;
+      case Opcode::GetGlobal:
+        GetGlobal();
         break;
     }
   }
@@ -164,8 +169,31 @@ void VM::loop() {
 
 void VM::print() {
   auto popped = pop().release();
-  std::cout << *popped << std::endl;
   *output << *popped << std::endl;
+}
+
+void VM::DefineGlobal() {
+  auto value = pop().release();
+  auto varName = ReadString();
+  globals.insert(std::make_pair(varName, value));
+}
+
+void VM::GetGlobal() {
+  auto name = ReadString();
+
+  if(globals.find(name) == globals.end()) {
+    throw std::exception();
+  } else {
+    auto value = std::move(globals.at(name));
+
+    if (value->Type == ValueType::Number) {
+      push(std::make_unique<Value>(value->number));
+    } else if (value->Type == ValueType::Bool) {
+      push(std::make_unique<Value>(value->bool_));
+    } else if (value->Type == ValueType::String) {
+      push(std::make_unique<Value>(value->string_));
+    }
+  }
 }
 
 void VM::CallValue(std::uint8_t arity) {
@@ -207,6 +235,8 @@ std::unique_ptr<Value> VM::read_constant() {
     return std::make_unique<Value>(constant->number);
   } else if (constant->Type == ValueType::Bool) {
     return std::make_unique<Value>(constant->bool_);
+  } else if (constant->Type == ValueType::String) {
+    return std::make_unique<Value>(constant->string_);
   }
 
   throw std::exception();
@@ -214,6 +244,12 @@ std::unique_ptr<Value> VM::read_constant() {
 //  auto foobar = std::make_unique<Value>(*constant);
 //
 //  return foobar; // TODO:
+}
+
+std::string VM::ReadString() {
+  auto val = read_constant();
+  if (val->Type != ValueType::String) throw std::exception();
+  return val->string_;
 }
 
 std::uint8_t VM::read_byte() {

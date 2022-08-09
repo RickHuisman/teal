@@ -46,6 +46,7 @@ struct FunctionObj {
 enum ValueType {
   Number,
   Bool,
+  String,
   Closure,
 };
 
@@ -60,6 +61,7 @@ struct Value {
 
   float number;
   bool bool_;
+  std::string string_;
   std::unique_ptr<ClosureValue> closure;
 
   explicit Value(float n)
@@ -67,6 +69,9 @@ struct Value {
 
   explicit Value(bool b)
       : Type(ValueType::Bool), bool_(b), closure(nullptr) {}
+
+  explicit Value(std::string s)
+      : Type(ValueType::String), string_(std::move(s)), closure(nullptr) {}
 
   explicit Value(ClosureValue closure)
       : Type(ValueType::Closure),

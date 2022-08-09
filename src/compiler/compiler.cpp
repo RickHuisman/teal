@@ -83,48 +83,50 @@ void Compiler::emit_byte(std::uint8_t byte) {
   current.function->bytecode->WriteByte(byte);
 }
 
-void Compiler::add_local(Identifier name) {
+void Compiler::add_local(std::string name) {
   if (current.locals.size() == UINT8_MAX) {
+    throw std::exception();
     // TODO: Throw error if too many locals.
   }
 
   Local local;;
-  local.name = name;
+  local.name = std::move(name);
   local.depth = -1;
   local.initialized = false;
 
   current.locals.push_back(local);
 }
 
-void Compiler::declare_variable(Identifier *name) {
+void Compiler::declare_variable(std::string *name) {
   if (current.scope_depth == 0) return;
 
   for (const auto& local : current.locals) {
-    if (local.depth != -1 && local.depth < current.scope_depth) {
+    if (local.depth < current.scope_depth) {
       break;
     }
 
-//    if (name == local.name) {
-    // TODO: Throw error.
-//    }
+    if (*name == local.name) throw std::exception();
   }
 
-  add_local(*name); // TODO: Dereference?
+  add_local(*name);
 }
 
 void Compiler::mark_initialized() {
   if (current.scope_depth == 0) return;
   current.locals[current.locals.size() - 1].depth =
       current.scope_depth;
+  current.locals[current.locals.size() - 1].initialized = true;
 }
 
-void Compiler::define_variable(Identifier *name) {
+void Compiler::define_variable(std::string *name) {
   if (current.scope_depth > 0) {
     mark_initialized();
     return;
   }
 
-  // TODO:
-//  auto global = current_chunk()->add_constant(name);
-//  emitBytes(Opcode::define_global, global);
+  // TODO: Works?
+  emit(Opcode::DefineGlobal);
+  auto val = std::make_unique<Value>(*name);
+  auto global = current.function->bytecode->AddConstant(std::move(val));
+  emit_byte(global);
 }

@@ -9,10 +9,10 @@
 using Identifier = std::string;
 
 struct Local {
-  std::string name;
-  uint8_t depth; // TODO: uint8_t?
+  Identifier name;
+  std::uint8_t depth;
   bool initialized;
-  uint8_t slot; // TODO: uint8_t
+  std::uint8_t slot;
 };
 
 struct CompilerInstance {
@@ -30,11 +30,10 @@ struct CompilerInstance {
   std::optional<CompilerInstance *> enclosing;
 };
 
-class Compiler {
+struct Compiler {
   CompilerInstance current;
   // TODO: Errors.
 
- public:
   Compiler() : current(CompilerInstance(FunctionType::Script)) {}
 
   void begin_scope();

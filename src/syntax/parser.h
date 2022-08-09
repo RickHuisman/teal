@@ -28,8 +28,7 @@ class Parser {
   Expr *DeclareLet();
   Expr *ParseIf();
   Expr *ParseBlock();
-  Expr *Int(Token token);  // TODO: Rename.
-  Expr *String(Token token);  // TODO: Rename.
+  Expr *ParseNumber(Token token);  // TODO: Rename.
   Expr *Literal(Token token);
 
   Token Consume();
@@ -76,9 +75,8 @@ class Parser {
       {TokenType::Identifier,   {&Parser::ParseIdent, nullptr,         Precedence::None}},
       {TokenType::True,         {&Parser::Literal,    nullptr,         Precedence::None}},
       {TokenType::False,        {&Parser::Literal,    nullptr,         Precedence::None}},
-      {TokenType::Number,       {&Parser::Int,        nullptr,         Precedence::None}},
+      {TokenType::Number,       {&Parser::ParseNumber, nullptr, Precedence::None}},
       {TokenType::LeftParen,    {nullptr,             &Parser::Call,   Precedence::Call}},
-      {TokenType::String,       {&Parser::String,     nullptr,         Precedence::None}},
   };
 
 public:

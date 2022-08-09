@@ -4,12 +4,8 @@
 std::vector<Expr *> Parser::Parse() {
   std::vector<Expr *> exprs;
 
-  while (HasNext()) {
-    if (Check(TokenType::Eof)) {  // TODO Hacky fix.
-      Consume();
-    } else {
-      exprs.push_back(Declaration());
-    }
+  while (HasNext() && !Check(TokenType::Eof)) {
+    exprs.push_back(Declaration());
   }
 
   return exprs;
@@ -157,13 +153,9 @@ Expr *Parser::Binary(Expr *left, Token token) {
   return new BinaryExpr(left, op, right);
 }
 
-Expr *Parser::Int(Token token) {
-  auto number = std::stod(token.source.c_str());
+Expr *Parser::ParseNumber(Token token) {
+  auto number = std::stod(token.source);
   return new LiteralExpr(std::make_unique<Value>((float(number))));
-}
-
-Expr *Parser::String(Token token) {
-  throw "TODO";
 }
 
 Expr *Parser::Call(Expr *left, Token token) {

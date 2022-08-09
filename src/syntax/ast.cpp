@@ -49,17 +49,21 @@ void LetSetExpr::Compile(Compiler *compiler) {
 }
 
 void LetGetExpr::Compile(Compiler *compiler) {
-  std::cout << "let get\n";
+  compiler->emit(Opcode::GetGlobal);
+
+  auto stringVal = std::make_unique<Value>(ident);
+  auto constant_id = compiler->current.function->bytecode->AddConstant(
+      std::move(stringVal)
+  );
+  compiler->emit_byte(constant_id);
 }
 
 void IfElseExpr::Compile(Compiler *compiler) {
 }
 
 void BlockExpr::Compile(Compiler *compiler) {
-  std::cout << "block expr\n";
-
   compiler->begin_scope();
-  for (auto expr: exprs) {
+  for (auto expr : exprs) {
     expr->Compile(compiler);
   }
   compiler->end_scope();

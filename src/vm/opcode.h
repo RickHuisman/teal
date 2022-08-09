@@ -19,5 +19,6 @@ enum class Opcode : std::uint8_t {
     Loop,
     Pop,
     DefineGlobal,
+    GetGlobal,
     Print,
 };

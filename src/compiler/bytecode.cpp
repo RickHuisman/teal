@@ -38,7 +38,7 @@ int Bytecode::SimpleInstruction(const std::string &name, int offset) {
 
 int Bytecode::ConstantInstruction(const std::string &name, int offset) {
   auto constant = code_[offset + 1];
-  std::cout << std::setw(16)
+  std::cout << std::setw(18)
             << std::left
             << std::setfill(' ')
             << name
@@ -102,6 +102,8 @@ int Bytecode::DisassembleInstruction(int offset) {
     case Opcode::Loop:return JumpInstruction("OP_LOOP", -1, offset);
     case Opcode::Pop:return SimpleInstruction("OP_POP", offset);
     case Opcode::Print:return SimpleInstruction("OP_PRINT", offset);
+    case Opcode::DefineGlobal:return ConstantInstruction("OP_DEFINE_GLOBAL", offset);
+    case Opcode::GetGlobal:return ConstantInstruction("OP_GET_GLOBAL", offset);
   }
 }
 
@@ -183,8 +185,13 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
         os << "false";
       }
       break;
+    case String:
+      os << value.string_;
+      break;
     case Closure:os << "CLOSURE";
       break;
+    default:
+      throw std::exception();
   }
 
   return os;
