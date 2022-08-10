@@ -67,6 +67,10 @@ void VM::run() {
         break;
       case Opcode::SetGlobal:SetGlobal();
         break;
+      case Opcode::Closure:closure();
+        break;
+      case Opcode::Call:call_instr();
+        break;
     }
   }
 }
@@ -178,6 +182,9 @@ void VM::GetGlobal() {
     push(std::make_unique<Value>(value->bool_));
   } else if (value->Type == ValueType::String) {
     push(std::make_unique<Value>(value->string_));
+  } else if (value->Type == ValueType::Closure) {
+    auto closure = *value->closure;
+    push(std::make_unique<Value>(closure));
   }
 }
 
@@ -199,6 +206,16 @@ void VM::SetGlobal() {
     globals[name] = std::make_unique<Value>(value->string_);
     push(std::make_unique<Value>(value->string_));
   }
+}
+
+void VM::closure() {
+  auto closure = read_function()->function;
+  push(std::make_unique<Value>(closure));
+}
+
+void VM::call_instr() {
+  auto arity = read_byte();
+  CallValue(arity);
 }
 
 void VM::CallValue(std::uint8_t arity) {
@@ -242,12 +259,12 @@ std::unique_ptr<Value> VM::read_constant() {
     return std::make_unique<Value>(constant->bool_);
   } else if (constant->Type == ValueType::String) {
     return std::make_unique<Value>(constant->string_);
+  } else if (constant->Type == ValueType::Closure) {
+    return std::make_unique<Value>(constant->closure->function);
   }
 
   throw std::exception();
-
 //  auto foobar = std::make_unique<Value>(*constant);
-//
 //  return foobar; // TODO:
 }
 
@@ -255,6 +272,12 @@ std::string VM::ReadString() {
   auto val = read_constant();
   if (val->Type != ValueType::String) throw std::exception();
   return val->string_;
+}
+
+std::unique_ptr<ClosureValue> VM::read_function() {
+  auto val = read_constant();
+  if (val->Type != ValueType::Closure) throw std::exception();
+  return std::move(val->closure);
 }
 
 std::uint8_t VM::read_byte() {
@@ -283,5 +306,5 @@ CallFrame *VM::current_frame() {
 }
 
 Bytecode *VM::current_bytecode() {
-  return current_frame()->closure->function->bytecode.get();
+  return current_frame()->closure->function->bytecode;
 }

@@ -18,8 +18,7 @@ struct Local {
 struct CompilerInstance {
   CompilerInstance(FunctionType function_type)
       : function(std::make_unique<FunctionObj>(FunctionObj("todo",
-                                                           std::make_unique<
-                                                               Bytecode>(),
+                                                           new Bytecode(),
                                                            0))),
         function_type(function_type) {};
 
@@ -38,6 +37,7 @@ struct Compiler {
 
   void begin_scope();
   void end_scope();
+  void SetInstance();
   std::unique_ptr<FunctionObj> end_compiler();
   int emit_jump(Opcode opcode);
   void emit_loop(int loop_start);

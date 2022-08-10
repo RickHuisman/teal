@@ -42,7 +42,7 @@ int Bytecode::ConstantInstruction(const std::string &name, int offset) {
             << std::left
             << std::setfill(' ')
             << name
-            << toascii(constant) // TODO: toascii?
+            << toascii(constant)
             << ' ';
 
   std::cout << "'" << *constants_[constant] << "'" << std::endl;
@@ -54,7 +54,7 @@ int Bytecode::JumpInstruction(const std::string &name, int sign, int offset) {
   jump |= code_[offset + 2];
 
   // Name.
-  std::cout << std::setw(16)
+  std::cout << std::setw(18)
             << std::left
             << std::setfill(' ')
             << name
@@ -66,10 +66,25 @@ int Bytecode::JumpInstruction(const std::string &name, int sign, int offset) {
             << std::right
             << offset
             << " -> ";
-  // TODO:
+
+  // TODO: +3 ?
   std::cout << offset + 3 + sign * jump
             << std::endl;
   return offset + 3;
+}
+
+int Bytecode::byte_instruction(const std::string &name, int offset) {
+  auto slot = code_[offset + 1];
+
+  std::cout << std::setw(18)
+            << std::left
+            << std::setfill(' ')
+            << name
+            << toascii(slot)
+            << ' '
+            << std::endl;
+
+  return offset + 2;
 }
 
 int Bytecode::DisassembleInstruction(int offset) {
@@ -105,6 +120,8 @@ int Bytecode::DisassembleInstruction(int offset) {
     case Opcode::DefineGlobal:return ConstantInstruction("OP_DEFINE_GLOBAL", offset);
     case Opcode::GetGlobal:return ConstantInstruction("OP_GET_GLOBAL", offset);
     case Opcode::SetGlobal:return ConstantInstruction("OP_SET_GLOBAL", offset);
+    case Opcode::Closure:return ConstantInstruction("OP_CLOSURE", offset);
+    case Opcode::Call:return byte_instruction("OP_CALL", offset);
   }
 }
 
@@ -189,7 +206,7 @@ std::ostream &operator<<(std::ostream &os, const Value &value) {
     case String:
       os << value.string_;
       break;
-    case Closure:os << "CLOSURE";
+    case Closure:os << "CLOSURE(" << value.closure->function->name << ")";
       break;
     default:
       throw std::exception();

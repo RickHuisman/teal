@@ -4,12 +4,14 @@
 #include "compiler.h"
 #include "bytecode.h"
 #include "syntax/parser.h"
+#include "syntax/morph.h"
 
 std::unique_ptr<FunctionObj> compile(const std::string& source) {
   auto lexer = std::make_unique<Lexer>(source);
   auto tokens = lexer->Lex();
+  auto morphed = morph(tokens);
 
-  auto parser = std::make_unique<Parser>(tokens);
+  auto parser = std::make_unique<Parser>(morphed);
   auto expressions = parser->Parse();
 
   auto compiler = std::make_unique<Compiler>();
@@ -28,17 +30,32 @@ void Compiler::begin_scope() {
 void Compiler::end_scope() {
   current.scope_depth -= 1;
 
-  // Pop locals.
-  // TODO:
+  // TODO: Pop locals.
+}
+
+void Compiler::SetInstance() {
+  // Take old compiler instance.
+  auto current_copy = new CompilerInstance(FunctionType::Function);
+  std::swap(*current_copy, current);
+
+  // Set new compiler instance.
+  current = CompilerInstance(FunctionType::Function);
+
+  // Add old compiler instance.
+  current.enclosing = std::make_optional(current_copy);
 }
 
 std::unique_ptr<FunctionObj> Compiler::end_compiler() {
-  // TODO: Fix.
-  current.function->bytecode->DisassembleBytecode();
+  emit(Opcode::Return);
 
-  std::unique_ptr<FunctionObj> ret;
-  std::swap(ret, current.function);
-  return ret;
+  auto fun_copy = *current.function;
+  fun_copy.bytecode->DisassembleBytecode();
+
+  if (current.enclosing.has_value()) {
+    current = std::move(*current.enclosing.value());
+  }
+
+  return std::make_unique<FunctionObj>(fun_copy);
 }
 
 int Compiler::emit_jump(Opcode opcode) { // TODO: Int?

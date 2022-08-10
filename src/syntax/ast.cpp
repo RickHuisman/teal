@@ -77,7 +77,47 @@ void BlockExpr::Compile(Compiler *compiler) {
   compiler->end_scope();
 }
 
+void compile_closure(Compiler *compiler,
+                     Identifier ident,
+                     std::vector<Identifier> params,
+                     std::vector<Expr *> exprs) {
+  compiler->begin_scope();
+
+  auto arity = params.size();
+
+  // Compile arguments.
+  for (auto &arg : params) {
+    compiler->declare_variable(&arg);
+    compiler->define_variable(&arg);
+  }
+
+  // Compile body.
+  for (auto expr : exprs) {
+    expr->Compile(compiler);
+  }
+
+  // Create the function object.
+  auto fun = compiler->end_compiler();
+  fun->name = ident;
+  fun->arity = arity;
+
+  compiler->emit(Opcode::Closure);
+
+  auto fun_copy = new FunctionObj(*fun);
+  auto constant_id = compiler->current.function->bytecode->AddConstant(
+      std::make_unique<Value>(fun_copy)
+  );
+  compiler->emit_byte(constant_id);
+}
+
 void FunExpr::Compile(Compiler *compiler) {
+  compiler->SetInstance();
+
+  auto ident = name;
+
+  compile_closure(compiler, name, params, exprs);
+
+  compiler->define_variable(&ident); // TODO: pointer exists?
 }
 
 void PrintExpr::Compile(Compiler *compiler) {
@@ -90,6 +130,16 @@ void LiteralExpr::Compile(Compiler *compiler) {
 }
 
 void CallExpr::Compile(Compiler *compiler) {
+  auto arity = args.size();
+
+  callee->Compile(compiler);
+
+  for (auto arg : args) {
+    arg->Compile(compiler);
+  }
+
+  compiler->emit(Opcode::Call);
+  compiler->emit_byte(arity);
 }
 
 void ReturnExpr::Compile(Compiler *compiler) {

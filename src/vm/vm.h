@@ -22,6 +22,7 @@ class VM {
   std::uint16_t read_short();
   std::string ReadString();
   std::unique_ptr<Value> read_constant();
+  std::unique_ptr<ClosureValue> read_function();
   CallFrame *current_frame();
 
  public:
@@ -51,6 +52,8 @@ class VM {
   void DefineGlobal();
   void GetGlobal();
   void SetGlobal();
+  void closure();
   void CallValue(std::uint8_t arity);
   void Call(ClosureValue closure, std::uint8_t arity);
+  void call_instr();
 };

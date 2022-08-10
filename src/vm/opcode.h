@@ -22,4 +22,6 @@ enum class Opcode : std::uint8_t {
     GetGlobal,
     SetGlobal,
     Print,
+    Closure,
+    Call,
 };

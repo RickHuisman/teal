@@ -10,8 +10,10 @@ void CompileAndRun(const std::string& source) {
 int main() {
   auto source = R"(
 def foobar()
-  print 5;
+  print 5
 end
+
+foobar()
 )";
 
   CompileAndRun(source);

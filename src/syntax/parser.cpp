@@ -75,13 +75,15 @@ Expr *Parser::ParseDef() {
 
   Consume(TokenType::RightParen, "TODO");
 
-  // Body.
-  Consume(TokenType::LeftBrace, "TODO");
+  Consume(TokenType::Line, "TODO");
 
+  // Body.
   std::vector<Expr *> exprs;
-  while (!Match(TokenType::RightBrace)) {
+  while (!Match(TokenType::End) && !Check(TokenType::Eof)) {
     exprs.push_back(Declaration());
   }
+
+  Consume(TokenType::Line, "TODO");
 
   return new FunExpr(ident.source, params, exprs);
 }
@@ -98,7 +100,7 @@ Expr *Parser::ParseReturn() {
 Expr *Parser::ExprStatement() {
   auto expr = Expression();
   Consume(TokenType::Line,
-          "Expect ';' after expression.");  // TODO: Check (changed from ';' -> Line).
+          "Expect 'Line' after expression."); // TODO: Update message?
   return expr;
 }
 

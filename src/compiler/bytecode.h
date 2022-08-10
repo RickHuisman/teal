@@ -22,6 +22,7 @@ class Bytecode {
   int ConstantInstruction(const std::string &name, int offset);
   static int SimpleInstruction(const std::string &name, int offset);
   int JumpInstruction(const std::string &name, int sign, int offset);
+  int byte_instruction(const std::string &name, int offset);
 };
 
 // TODO: Move?
@@ -33,13 +34,13 @@ enum class FunctionType {
 
 struct FunctionObj {
   std::string name;
-  std::unique_ptr<Bytecode> bytecode;
+  Bytecode *bytecode;
   std::uint8_t arity = 0;
 
   FunctionObj(std::string name,
-              std::unique_ptr<Bytecode> bytecode,
+              Bytecode *bytecode,
               std::uint8_t arity) : name(std::move(name)),
-                                    bytecode(std::move(bytecode)),
+                                    bytecode(bytecode),
                                     arity(arity) {};
 };
 
